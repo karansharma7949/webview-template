@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       app_name:
-        description: 'App name'
+        description: "App name"
         required: true
       app_url:
-        description: 'Website URL'
+        description: "Website URL"
         required: true
       logo_url:
-        description: 'Logo image URL (for launcher and splash)'
+        description: "Logo image URL (for launcher and splash)"
         required: true
       package_name:
-        description: 'Android package name (e.g. com.mycompany.myapp)'
+        description: "Android package name (e.g. com.mycompany.myapp)"
         required: true
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: "3.32.7"
 
       - name: Get dependencies
         run: flutter pub get
@@ -52,7 +52,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
