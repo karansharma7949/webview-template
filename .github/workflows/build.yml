@@ -37,7 +37,7 @@ jobs:
           sed -i "s|APP_URL_PLACEHOLDER|${{ github.event.inputs.app_url }}|g" .env
 
       - name: change app name
-        run: flutter pub run rename setAppName --targets android,ios --value ${{ github.event.inputs.package_name }}
+        run: flutter pub run rename setAppName --targets android,ios --value ${{ github.event.inputs.app_name }}
 
       - name: Download app icon
         run: curl -L "${{ github.event.inputs.logo_url }}" -o assets/icons/logo.png
@@ -46,7 +46,7 @@ jobs:
         run: flutter pub run flutter_launcher_icons:main
 
       - name: Change package name
-        run: flutter pub run rename setBundleId --targets android,ios --value ${{ github.event.inputs.app_name }}
+        run: flutter pub run rename setBundleId --targets android,ios --value ${{ github.event.inputs.package_name }}
 
       - name: Create keystore
         run: |
