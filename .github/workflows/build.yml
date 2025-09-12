@@ -48,7 +48,18 @@ jobs:
       - name: Change package name
         run: flutter pub run rename setBundleId --targets android,ios --value ${{ github.event.inputs.package_name }}
 
-      - name: Build release APK
+      - name: Create keystore
+        run: |
+          echo "${{ secrets.KEYSTORE }}" | base64 --decode > android/upload-keystore.jks
+
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties  
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=../upload-keystore.jks" >> android/key.properties
+
+      - name: Build APK
         run: flutter build apk --release
 
       - name: Upload APK artifact
