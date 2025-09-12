@@ -1,0 +1,58 @@
+name: Build Custom Flutter APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_name:
+        description: 'App name'
+        required: true
+      app_url:
+        description: 'Website URL'
+        required: true
+      logo_url:
+        description: 'Logo image URL (for launcher and splash)'
+        required: true
+      package_name:
+        description: 'Android package name (e.g. com.mycompany.myapp)'
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Replace .env values
+        run: |
+          sed -i "s|APP_URL_PLACEHOLDER|${{ github.event.inputs.app_url }}|g" .env
+
+      - name: Replace app name placeholder in pubspec.yaml
+        run: sed -i "s/APP_NAME_PLACEHOLDER/${{ github.event.inputs.app_name }}/g" pubspec.yaml
+
+      - name: Download app icon
+        run: curl -L "${{ github.event.inputs.logo_url }}" -o assets/icons/logo.png
+
+      - name: Generate launcher icons
+        run: flutter pub run flutter_launcher_icons:main
+
+      - name: Change package name
+        run: flutter pub run rename --bundleId ${{ github.event.inputs.package_name }}
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
