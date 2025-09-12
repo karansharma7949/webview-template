@@ -12,7 +12,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.example.jeeto360"
+    namespace = "com.example.apk"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
