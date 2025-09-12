@@ -46,7 +46,7 @@ jobs:
         run: flutter pub run flutter_launcher_icons:main
 
       - name: Change package name
-        run: flutter pub run rename --bundleId ${{ github.event.inputs.package_name }}
+        run: flutter pub run rename setBundleId --targets android,ios --value ${{ github.event.inputs.package_name }}
 
       - name: Build release APK
         run: flutter build apk --release
