@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Jeeto360',
-      home: const MyHomePage(title: 'Jeeto360'),
+      home: const MyHomePage(title: 'apk'),
     );
   }
 }
