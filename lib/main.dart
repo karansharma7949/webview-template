@@ -40,7 +40,11 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    final String initialUrl = dotenv.env['WEBVIEW_URL']!;
+
+    // Get initial URL with fallback
+    final String initialUrl =
+        dotenv.env['WEBVIEW_URL'] ?? '';
+
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0xFFFFFFFF))
@@ -53,12 +57,15 @@ class _MyHomePageState extends State<MyHomePage> {
       )
       ..loadRequest(Uri.parse(initialUrl));
 
-    // Start 1-minute timer for splash screen
-    _splashTimer = Timer(const Duration(minutes: 1), () {
+    // Start timer for splash screen (testing with 10 seconds first)
+    print('Starting splash screen timer...');
+    _splashTimer = Timer(const Duration(seconds: 10), () {
+      print('Timer completed, hiding splash screen...');
       if (mounted) {
         setState(() {
           _showSplash = false;
         });
+        print('Splash screen hidden, showing webview...');
       }
     });
   }
@@ -77,14 +84,14 @@ class _MyHomePageState extends State<MyHomePage> {
         (logoPath.startsWith('http://') || logoPath.startsWith('https://'))
             ? Image.network(
                 logoPath,
-                width: 130,
-                height: 130,
+                width: 120,
+                height: 120,
                 fit: BoxFit.contain,
               )
             : Image.asset(
                 logoPath,
-                width: 130,
-                height: 130,
+                width: 120,
+                height: 120,
                 fit: BoxFit.contain,
               );
 
@@ -108,7 +115,20 @@ class _MyHomePageState extends State<MyHomePage> {
               ? Container(
                   color: Colors.white,
                   child: Center(
-                    child: splashLogo,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        splashLogo,
+                        const SizedBox(height: 20),
+                        const Text(
+                          'Loading...',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : WebViewWidget(controller: controller),
