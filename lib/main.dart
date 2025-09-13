@@ -57,9 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
       )
       ..loadRequest(Uri.parse(initialUrl));
 
-    // Start timer for splash screen (testing with 10 seconds first)
+    // Start timer for splash screen (testing with 1 seconds first)
     print('Starting splash screen timer...');
-    _splashTimer = Timer(const Duration(seconds: 10), () {
+    _splashTimer = Timer(const Duration(seconds: 1), () {
       print('Timer completed, hiding splash screen...');
       if (mounted) {
         setState(() {
@@ -119,14 +119,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         splashLogo,
-                        const SizedBox(height: 20),
-                        const Text(
-                          'Loading...',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                        ),
                       ],
                     ),
                   ),
