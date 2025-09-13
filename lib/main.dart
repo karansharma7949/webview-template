@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/services.dart'; // For SystemNavigator
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:async';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Jeeto360',
+      title: 'apk',
       home: const MyHomePage(title: 'apk'),
     );
   }
@@ -33,9 +34,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late final WebViewController controller;
-  bool _isInitialPageLoading = true;
-  bool _hasCompletedFirstLoad = false;
-  int _loadProgress = 0;
+  bool _showSplash = true;
+  Timer? _splashTimer;
 
   @override
   void initState() {
@@ -46,45 +46,27 @@ class _MyHomePageState extends State<MyHomePage> {
       ..setBackgroundColor(const Color(0xFFFFFFFF))
       ..setNavigationDelegate(
         NavigationDelegate(
-          onProgress: (int progress) {
-            if (!_hasCompletedFirstLoad && mounted) {
-              setState(() {
-                _loadProgress = progress;
-              });
-            }
-          },
-          onPageStarted: (String url) {
-            if (!_hasCompletedFirstLoad && mounted) {
-              setState(() {
-                _isInitialPageLoading = true;
-              });
-            }
-          },
-          onPageFinished: (String url) {
-            if (mounted) {
-              setState(() {
-                _isInitialPageLoading = false;
-                _hasCompletedFirstLoad = true;
-              });
-            }
-          },
-          onWebResourceError: (WebResourceError error) {
-            if (!_hasCompletedFirstLoad && mounted) {
-              // Only keep splash for main-frame load failures; ignore subresource errors
-              final bool isMainFrame = (error.isForMainFrame == true);
-              if (isMainFrame) {
-                setState(() {
-                  _isInitialPageLoading = true;
-                });
-              }
-            }
-          },
           onNavigationRequest: (NavigationRequest request) {
             return NavigationDecision.navigate;
           },
         ),
       )
       ..loadRequest(Uri.parse(initialUrl));
+
+    // Start 1-minute timer for splash screen
+    _splashTimer = Timer(const Duration(minutes: 1), () {
+      if (mounted) {
+        setState(() {
+          _showSplash = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _splashTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -95,16 +77,17 @@ class _MyHomePageState extends State<MyHomePage> {
         (logoPath.startsWith('http://') || logoPath.startsWith('https://'))
             ? Image.network(
                 logoPath,
-                width: 120,
-                height: 120,
+                width: 130,
+                height: 130,
                 fit: BoxFit.contain,
               )
             : Image.asset(
                 logoPath,
-                width: 120,
-                height: 120,
+                width: 130,
+                height: 130,
                 fit: BoxFit.contain,
               );
+
     return PopScope(
       canPop: false, // Prevent default pop behavior
       onPopInvokedWithResult: (bool didPop, Object? result) async {
@@ -121,45 +104,14 @@ class _MyHomePageState extends State<MyHomePage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Stack(
-            children: <Widget>[
-              WebViewWidget(controller: controller),
-              Positioned.fill(
-                child: IgnorePointer(
-                  ignoring: !_isInitialPageLoading,
-                  child: AnimatedOpacity(
-                    opacity: _isInitialPageLoading ? 1.0 : 0.0,
-                    duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOut,
-                    child: Container(
-                      color: Colors.white,
-                      child: Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            splashLogo,
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: 28,
-                              height: 28,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                value: (_hasCompletedFirstLoad
-                                    ? 1.0
-                                    : (_loadProgress > 0 && _loadProgress < 100)
-                                        ? _loadProgress / 100.0
-                                        : null),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+          child: _showSplash
+              ? Container(
+                  color: Colors.white,
+                  child: Center(
+                    child: splashLogo,
                   ),
-                ),
-              ),
-            ],
-          ),
+                )
+              : WebViewWidget(controller: controller),
         ),
       ),
     );
